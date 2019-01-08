@@ -12,12 +12,12 @@ import tensorflow as tf
 
 
 
-dataset_dir=''
-output_dir=''
+dataset_dir='Oxford-102'
+output_dir='out_test'
 LABELS_FILENAME = 'labels.txt'
+OUTPUTFILE_NAME = 'flower'
 # The number of shards per dataset split.
 _NUM_SHARDS = 5
-
 
 # Seed for repeatability.
 _RANDOM_SEED = 0
@@ -110,8 +110,8 @@ class ImageReader(object):
 
 
 def _get_dataset_filename(dataset_dir, split_name, shard_id):
-  output_filename = 'datas_%s_%05d-of-%05d.tfrecord' % (
-      split_name, shard_id, _NUM_SHARDS)
+  output_filename = '%s_%s_%05d-of-%05d.tfrecord' % (
+      OUTPUTFILE_NAME, split_name, shard_id, _NUM_SHARDS)
   return os.path.join(dataset_dir, output_filename)
 
 
@@ -191,7 +191,11 @@ def _convert_dataset(split_name, filenames, class_names_to_ids, dataset_dir):
   sys.stdout.flush()
 
 
+  
 def run():
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+      
     photo_filenames, class_names = _get_filenames_and_classes(dataset_dir)
     class_names_to_ids = dict(zip(class_names, range(len(class_names))))
     
@@ -212,10 +216,16 @@ def run():
     
     # Finally, write the labels file:
     labels_to_class_names = dict(zip(range(len(class_names)), class_names))
-    write_label_file(labels_to_class_names, dataset_dir)
+    write_label_file(labels_to_class_names, output_dir)
     
-    print('\nFinished converting the Flowers dataset!')
+    print('\nFinished converting the dataset!')
+    print('num_train', len(training_filenames))
+    print('num_validation', len(validation_filenames))
+    print('num_class', len(class_names))
 
 
 if __name__=='__main__':
     run()
+  
+  
+  
