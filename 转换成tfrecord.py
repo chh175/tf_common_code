@@ -8,19 +8,22 @@ import random
 import sys
 
 import tensorflow as tf
+import argparse
 
 
 
 
-dataset_dir='Oxford-102'
-output_dir='out_test'
+dataset_dir='H:\\resface\\Additive-Margin-Softmax\\align\\align_face'
+output_dir='H:\\align_lfw_face_tfrecord'
 LABELS_FILENAME = 'labels.txt'
-OUTPUTFILE_NAME = 'flower'
+OUTPUTFILE_NAME = 'align_lfw'
+TRAIN_VALID_SPLIT = 1
 # The number of shards per dataset split.
 _NUM_SHARDS = 5
 
 # Seed for repeatability.
 _RANDOM_SEED = 0
+
 
 
 def write_label_file(labels_to_class_names, dataset_dir,
@@ -202,7 +205,7 @@ def run():
     # Divide into train and test:
     random.seed(_RANDOM_SEED)
     random.shuffle(photo_filenames)
-    num_train = int(len(photo_filenames)*0.8)
+    num_train = int(len(photo_filenames)*TRAIN_VALID_SPLIT)
     
     training_filenames = photo_filenames[:num_train]
     validation_filenames = photo_filenames[num_train:]
@@ -211,7 +214,8 @@ def run():
     # First, convert the training and validation sets.
     _convert_dataset('train', training_filenames, class_names_to_ids,
                        output_dir)
-    _convert_dataset('validation', validation_filenames, class_names_to_ids,
+    if TRAIN_VALID_SPLIT < 1:
+        _convert_dataset('validation', validation_filenames, class_names_to_ids,
                        output_dir)
     
     # Finally, write the labels file:
@@ -222,10 +226,16 @@ def run():
     print('num_train', len(training_filenames))
     print('num_validation', len(validation_filenames))
     print('num_class', len(class_names))
+    
+    dataset_information = os.path.join(output_dir, 'dataset_information.txt')    
+    with open(dataset_information,'w') as f:
+        f.write('num_train = %d\n'%(len(training_filenames)))
+        f.write('num_validation = %d\n'%(len(validation_filenames)))
+        f.write('num_class = %d\n'%(len(class_names)))
+        
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     run()
-  
   
   
